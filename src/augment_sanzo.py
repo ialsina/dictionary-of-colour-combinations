@@ -1,13 +1,14 @@
 import json
 import cmyk_icc as icc
 from collections import OrderedDict
-import os
+from pathlib import Path
 
-dirname = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = Path(__file__).resolve().parent
 
-iccCMYK = os.path.join(dirname, 'data', 'icc', 'cmyk', 'U.S. Web Coated (SWOP) v2.icc')
-iccRGB = os.path.join(dirname, 'data', 'icc', 'RGB', 'sRGB IEC61966-2.1.icc')
+iccCMYK = ROOT_DIR / 'data' / 'icc' / 'cmyk' / 'U.S. Web Coated (SWOP) v2.icc'
+iccRGB = ROOT_DIR / 'data' /'icc' / 'RGB' / 'sRGB IEC61966-2.1.icc'
 intent = icc.RELATIVE_COLORIMETRIC
+
 
 def to_hex (rgb):
   rgb = [ max(0, min(255, round(n))) for n in rgb ]
@@ -22,17 +23,8 @@ def add_to_palette (palette_id, index):
   else:
     palettes[palette_id] = [ index ]
 
-files = [ os.path.join(dirname, 'data', 'swatches', s) for s in [
-  'swatches_a.json',
-  'swatches_b.json',
-  'swatches_c.json',
-  'swatches_d.json',
-  'swatches_e.json',
-  'swatches_f.json'
-] ]
-
-for i, file in enumerate(files):
-  with open(file) as json_file:
+for i, file in enumerate((ROOT_DIR / "swatches").iterdir()):
+  with open(file, "r", encoding="utf-8") as json_file:
     print('Loading', file)
     swatch = json.load(json_file)
     key = [ d for d in dict.keys(swatch) ][0]
@@ -58,7 +50,7 @@ for i, file in enumerate(files):
         add_to_palette(palette_id, index)
 
 out_data = colors
-out_file = os.path.join(dirname, '../', 'colors.json')
+out_file = ROOT_DIR.parent / "colors.json"
 with open(out_file, 'w') as outfile:
   json.dump(out_data, outfile, indent=2)
 
